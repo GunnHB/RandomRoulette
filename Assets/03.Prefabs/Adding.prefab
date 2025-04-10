@@ -50,7 +50,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 79d6e80efea7f2247bd3b620578682d3, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _addButton: {fileID: 2869692584427936273}
+  _addButton: {fileID: 7018778400615705377}
 --- !u!225 &2899927209206672026
 CanvasGroup:
   m_ObjectHideFlags: 0
@@ -74,7 +74,7 @@ GameObject:
   - component: {fileID: 5181788393136784230}
   - component: {fileID: 3583493625336460083}
   - component: {fileID: 6711209919745563436}
-  - component: {fileID: 2869692584427936273}
+  - component: {fileID: 7018778400615705377}
   m_Layer: 5
   m_Name: Button
   m_TagString: Untagged
@@ -136,7 +136,7 @@ MonoBehaviour:
     y: 0
     width: 1
     height: 1
---- !u!114 &2869692584427936273
+--- !u!114 &7018778400615705377
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -145,7 +145,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 7219807958082918643}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 602530d52b9646caa08cbe110b82150e, type: 3}
+  m_Script: {fileID: 11500000, guid: 4e29b1a8efbd4b44bb3f3716e73f07ff, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   m_Navigation:
@@ -155,7 +155,7 @@ MonoBehaviour:
     m_SelectOnDown: {fileID: 0}
     m_SelectOnLeft: {fileID: 0}
     m_SelectOnRight: {fileID: 0}
-  m_Transition: 0
+  m_Transition: 1
   m_Colors:
     m_NormalColor: {r: 1, g: 1, b: 1, a: 1}
     m_HighlightedColor: {r: 0.9607843, g: 0.9607843, b: 0.9607843, a: 1}

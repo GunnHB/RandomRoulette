@@ -9,6 +9,7 @@ using Sirenix.OdinInspector;
 
 using _02.Scripts.Common;
 using _02.Scripts.Manager;
+using DarkTonic.MasterAudio;
 using DG.Tweening;
 using Unity.VisualScripting;
 using UnityEngine.Serialization;
@@ -62,17 +63,30 @@ namespace _02.Scripts.Roulette
         [SerializeField] private UIButton _spinButton = null;
         [SerializeField] private Adding _addingPrefab = null;
         
+        private Adding _adding = null;
+        
         private List<InputBox> _inputBoxList = new List<InputBox>();
         private List<RouletteData> _rouletteDataList = new List<RouletteData>();
         private List<RouletteItem> _rouletteItemList = new List<RouletteItem>();
-
-        private Adding _adding = null;
+        
+        private List<float[]> _rouletteAngleList = new List<float[]>();
+        
+        // PlayTick 처리용
+        private List<float> _tickAngles = new(); // 경계각 리스트 (보정 포함)
+        private float _prevZ;
+        private float _accumulatedRotation;
+        private int _tickIndex;
 
         private void Awake()
         {
             AddElement();
             
             BindEvent();
+        }
+
+        private void OnDestroy()
+        {
+            GameManager.Instance.OnRequestSpinning -= OnSpinning;
         }
 
         private void AddElement()
@@ -110,18 +124,19 @@ namespace _02.Scripts.Roulette
             {
                 _adding = Instantiate(_addingPrefab, _scrollView.content);
                 
-                _adding.AddButton.onClick.AddListener(() =>
-                {
-                    if (GameManager.Instance.IsSpinning)
-                        return;
-                    
-                    AddElement();
-                });
+                _adding.AddButton.onClick.AddListener(AddElement);
+                
+                GameManager.Instance.OnRequestSpinning += OnSpinning;
             }
             
             _adding.gameObject.SetActive(true);
             
             _adding.transform.SetAsLastSibling();
+        }
+
+        private void OnSpinning(bool value)
+        {
+            _adding.AddButton.interactable = !value;
         }
         
         private void SetupInputBox(RouletteData newData)
@@ -206,6 +221,9 @@ namespace _02.Scripts.Roulette
 
         private void OnRemoveRoulette(InputBox inputBox)
         {
+            if (inputBox == null || inputBox.gameObject == null)
+                return;
+            
             int index = _inputBoxList.IndexOf(inputBox);
             
             Sequence sequence = DOTween.Sequence()
@@ -249,9 +267,13 @@ namespace _02.Scripts.Roulette
 
         private void OnClickSpinButton()
         {
-            Sequence sequence = DOTween.Sequence();
+            float randomRotations = UnityEngine.Random.Range(20f, 30f);     // 20 ~ 30바퀴
+            float randomAngle = UnityEngine.Random.Range(0f, 360f);         // 멈출 위치
+            float totalAngle = 360f * randomRotations + randomAngle;
 
-            sequence
+            SetRouletteAngleList();
+            
+            Sequence sequence = DOTween.Sequence()
                 .SetAutoKill(false)
                 .OnStart(() =>
                 {
@@ -259,51 +281,134 @@ namespace _02.Scripts.Roulette
                 })
                 .Append(_spinButton.transform.DOScale(0f, .3f).SetEase(Ease.InBounce))
                 .Join(_spinButton.GetComponent<CanvasGroup>().DOFade(0f, .3f))
-                .InsertCallback(0.2f, () =>
+                .InsertCallback(0.2f, () => { SpinRoulette(totalAngle); });
+        }
+
+        private void SetRouletteAngleList()
+        {
+            // 리스트 초기화
+            _rouletteAngleList.Clear();
+            
+            float totalWeight = _rouletteDataList.Sum(item => item.ThisWeight);
+            float accumulatedWeight = 0f;
+            
+            for (int index = 0; index < _rouletteDataList.Count; ++index)
+            {
+                // 아이템 마다의 가중치를 이용해 각도를 계산
+                float start = ((accumulatedWeight / totalWeight) * 360f);
+                float end = (((accumulatedWeight + _rouletteDataList[index].ThisWeight) / totalWeight) * 360f);
+                
+                // 리스트에 추가
+                _rouletteAngleList.Add(new []{ start, end });
+                
+                accumulatedWeight += _rouletteDataList[index].ThisWeight;
+            }
+        }
+        
+        private void SpinRoulette(float totalAngle)
+        {
+            if (_roulette == null)
+                return;
+
+            _roulette.RouletteBase.transform.localEulerAngles = Vector3.zero;
+
+            _prevZ = 0f;
+            _accumulatedRotation = 0f;
+            _tickIndex = 0;
+
+            SetupTickAngles();
+        
+            _roulette.RouletteBase.transform
+                .DORotate(new Vector3(0f, 0f, -totalAngle), 5f, RotateMode.FastBeyond360).SetEase(Ease.OutQuart)
+                .OnUpdate(() =>
                 {
-                    if (_roulette == null)
-                        return;
-
-                    float randomRotations = UnityEngine.Random.Range(20f, 30f); // 20 ~ 30바퀴 랜덤
-                    float randomAngle = UnityEngine.Random.Range(0f, 360f); // 멈출 위치도 랜덤
-                    float totalAngle = 360f * randomRotations + randomAngle;
-
-                    _roulette.RouletteBase.transform
-                        .DORotate(new Vector3(0f, 0f, -totalAngle), 5f, RotateMode.FastBeyond360)
-                        .SetEase(Ease.OutQuart)
-                        .OnComplete(() =>
-                        {
-                            _spinButton.transform.localScale = Vector3.one;
-                            _spinButton.GetComponent<CanvasGroup>().alpha = 1;
+                    if(GameManager.Instance.IsSpinning)
+                        PlayTick();
+                })
+                .OnComplete(() =>
+                {
+                    GameManager.Instance.IsSpinning = false;
+                    
+                    _spinButton.transform.localScale = Vector3.one;
+                    _spinButton.GetComponent<CanvasGroup>().alpha = 1;
                             
-                            float finalAngle = totalAngle % 360f;
-                            int resultIndex = GetWinningIndex(finalAngle);
-                            
-                            GameManager.Instance.ActivateResult(_rouletteDataList[resultIndex]);
-                        });;
+                    float finalAngle = totalAngle % 360f;
+                    RouletteData winningData = GetWinningData(finalAngle);
+                    
+                    GameManager.Instance.ActivateResult(winningData);
                 });
         }
         
-        private int GetWinningIndex(float finalAngle)
+        private void SetupTickAngles()
         {
-            float totalWeight = _rouletteDataList.Sum(item => item.ThisWeight);
-            float accumulatedWeight = 0f;
+            _tickAngles.Clear();
 
-            // 보정
-            float normalizedAngle = finalAngle;
+            float totalWeight = _rouletteDataList.Sum(d => d.ThisWeight);
+            float accumulated = 0f;
 
-            for (int i = 0; i < _rouletteDataList.Count; ++i)
+            for (int i = 0; i < _rouletteDataList.Count; i++)
             {
-                float startAngle = (accumulatedWeight / totalWeight) * 360f;
-                float endAngle = ((accumulatedWeight + _rouletteDataList[i].ThisWeight) / totalWeight) * 360f;
+                float ratio = accumulated / totalWeight;
+                float startAngle = 360f * ratio;
 
-                if (normalizedAngle >= startAngle && normalizedAngle < endAngle)
-                    return i;
+                _tickAngles.Add(startAngle);
+                accumulated += _rouletteDataList[i].ThisWeight;
+            }
+        }
+        
+        // private void PlayTick()
+        // {
+        //     if (_roulette == null)
+        //         return;
+        //
+        //     if (_angleListIndex >= _rouletteDataList.Count)
+        //         _angleListIndex %= _rouletteDataList.Count;
+        //     
+        //     float currAngle = 360f - _roulette.RouletteBase.eulerAngles.z;
+        //     if (currAngle >= _rouletteAngleList[_angleListIndex][1])
+        //     {
+        //         Debug.Log("Playing Tick!!");
+        //         
+        //         ++_angleListIndex;
+        //     }
+        // }
+        
+        private void PlayTick()
+        {
+            float currentZ = _roulette.RouletteBase.transform.eulerAngles.z;
+            float delta = (_prevZ - currentZ + 360f) % 360f;
+            _accumulatedRotation += delta;
+            _prevZ = currentZ;
 
-                accumulatedWeight += _rouletteDataList[i].ThisWeight;
+            int pieceCount = _tickAngles.Count;
+
+            while (true)
+            {
+                int logicalIndex = _tickIndex % pieceCount;
+                int lap = _tickIndex / pieceCount;
+                float targetAngle = _tickAngles[logicalIndex] + lap * 360f;
+
+                if (_accumulatedRotation >= targetAngle)
+                {
+                    MasterAudio.PlaySound("Tick");
+                    _tickIndex++;
+                }
+                else break;
+            }
+        }
+        
+        private RouletteData GetWinningData(float finalAngle)
+        {
+            if (_rouletteAngleList.Count == 0)
+                return null;
+
+            for (int index = 0; index < _rouletteAngleList.Count; ++index)
+            {
+                if (finalAngle >= _rouletteAngleList[index][0] && finalAngle < _rouletteAngleList[index][1])
+                    return _rouletteDataList[index];
             }
 
-            return _rouletteDataList.Count - 1;
+            return null;
         }
     }
 }

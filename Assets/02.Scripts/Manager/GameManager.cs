@@ -36,7 +36,7 @@ namespace _02.Scripts.Manager
                 OnRequestSpinning?.Invoke(_bIsSpinning);
             }
         }
-
+        
         public void ActivateResult(RouletteData data)
         {
             if (data == null)
@@ -49,7 +49,7 @@ namespace _02.Scripts.Manager
                 {
                     _resultPanel.Popup.transform.localScale = Vector3.zero;
                     _resultPanel.Popup.GetComponent<CanvasGroup>().alpha = 0;
-                    
+
                     _resultPanel.gameObject.SetActive(true);
                 })
                 .Append(_resultPanel.Popup.transform.DOScale(1f, .15f).SetEase(Ease.OutBounce))
@@ -57,10 +57,6 @@ namespace _02.Scripts.Manager
                 .JoinCallback(() =>
                 {
                     MasterAudio.PlaySound("Ta-da");
-                })
-                .OnComplete(() =>
-                {
-                    IsSpinning = false;
                 });
         }
 

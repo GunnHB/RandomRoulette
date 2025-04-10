@@ -279,7 +279,7 @@ GameObject:
   - component: {fileID: 2893897344678889182}
   - component: {fileID: 2781826267942502462}
   - component: {fileID: 3638649184548409754}
-  - component: {fileID: 4080034394676345961}
+  - component: {fileID: 2524254916914130694}
   m_Layer: 5
   m_Name: RemoveButton
   m_TagString: Untagged
@@ -341,7 +341,7 @@ MonoBehaviour:
     y: 0
     width: 1
     height: 1
---- !u!114 &4080034394676345961
+--- !u!114 &2524254916914130694
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -350,7 +350,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 5175907565708954948}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 602530d52b9646caa08cbe110b82150e, type: 3}
+  m_Script: {fileID: 11500000, guid: 4e29b1a8efbd4b44bb3f3716e73f07ff, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   m_Navigation:
@@ -360,7 +360,7 @@ MonoBehaviour:
     m_SelectOnDown: {fileID: 0}
     m_SelectOnLeft: {fileID: 0}
     m_SelectOnRight: {fileID: 0}
-  m_Transition: 0
+  m_Transition: 1
   m_Colors:
     m_NormalColor: {r: 1, g: 1, b: 1, a: 1}
     m_HighlightedColor: {r: 0.9607843, g: 0.9607843, b: 0.9607843, a: 1}
@@ -558,7 +558,7 @@ MonoBehaviour:
   _downButton: {fileID: 8893243649500471767}
   _numText: {fileID: 1335040519080486574}
   _label: {fileID: 7693302046058647049}
-  _removeButton: {fileID: 4080034394676345961}
+  _removeButton: {fileID: 2524254916914130694}
 --- !u!225 &4516479538830180030
 CanvasGroup:
   m_ObjectHideFlags: 0

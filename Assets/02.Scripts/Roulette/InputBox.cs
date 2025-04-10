@@ -20,7 +20,7 @@ namespace _02.Scripts.Roulette
         [Title("Common")]
         [SerializeField] private TMP_Text _numText = null;
         [SerializeField] private Image _label = null;
-        [SerializeField] private UIButton _removeButton = null;
+        [SerializeField] private Button _removeButton = null;
         
         private RouletteData _rouletteData = null;
 
@@ -121,15 +121,13 @@ namespace _02.Scripts.Roulette
 
         private void OnClickRemoveButton()
         {
-            if (GameManager.Instance.IsSpinning)
-                return;
-            
             OnRemoveAction?.Invoke(this);
         }
 
         private void OnSpinning(bool value)
         {
             _inputField.interactable = !value;
+            _removeButton.interactable = !value;
         }
     }
 }
