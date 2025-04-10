@@ -188,12 +188,12 @@ namespace _02.Scripts.Roulette
         {
             float totalWeight = _rouletteDataList.Sum(d => d.ThisWeight);
             float cumulativeFill = 0f;
-            float radius = 200f; // 조절 가능
+            float radius = 300f; // 조절 가능
 
             int count = _rouletteItemList.Count;
             for (int i = 0; i < count; i++)
             {
-                // ✅ 조각 순서 반대로 적용 (시계방향 조각, 반시계 그림)
+                // 조각 순서 반대로 적용 (시계방향 조각, 반시계 그림)
                 int index = count - 1 - i;
 
                 float weight = _rouletteDataList[index].ThisWeight;
