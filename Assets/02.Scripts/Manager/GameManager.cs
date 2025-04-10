@@ -1,9 +1,13 @@
+using UnityEngine;
+
+using System;
+
 using _02.Scripts.Result;
 using _02.Scripts.Roulette;
-using DarkTonic.MasterAudio;
+
 using DG.Tweening;
 using Sirenix.OdinInspector;
-using UnityEngine;
+using DarkTonic.MasterAudio;
 
 namespace _02.Scripts.Manager
 {
@@ -14,6 +18,8 @@ namespace _02.Scripts.Manager
         
         private static bool _bIsSpinning = false;
 
+        public Action<bool> OnRequestSpinning;
+
         private void Start()
         {
             if (_resultPanel != null)
@@ -23,7 +29,12 @@ namespace _02.Scripts.Manager
         public bool IsSpinning
         {
             get => _bIsSpinning;
-            set => _bIsSpinning = value;
+            set
+            { 
+                _bIsSpinning = value;
+                
+                OnRequestSpinning?.Invoke(_bIsSpinning);
+            }
         }
 
         public void ActivateResult(RouletteData data)
@@ -49,7 +60,7 @@ namespace _02.Scripts.Manager
                 })
                 .OnComplete(() =>
                 {
-                    _bIsSpinning = false;
+                    IsSpinning = false;
                 });
         }
 

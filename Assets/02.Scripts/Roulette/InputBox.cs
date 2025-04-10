@@ -36,6 +36,13 @@ namespace _02.Scripts.Roulette
             
             if(_removeButton != null)
                 _removeButton.onClick.AddListener(OnClickRemoveButton);
+
+            GameManager.Instance.OnRequestSpinning += OnSpinning;
+        }
+
+        private void OnDestroy()
+        {
+            GameManager.Instance.OnRequestSpinning -= OnSpinning;
         }
 
         public Button RemoveButton => _removeButton;
@@ -58,7 +65,6 @@ namespace _02.Scripts.Roulette
             _rouletteData.OnChangedColor += UpdateLabelColor;
             _rouletteData.OnChangedWeight += UpdateWeight;
             
-            _inputField.onSelect.AddListener(OnSelectInputField);
             _inputField.onValueChanged.AddListener(OnValueChangedInputField);
         }
 
@@ -76,12 +82,6 @@ namespace _02.Scripts.Roulette
                 return;
             
             _numText.SetText(_rouletteData.ThisWeight.ToString());
-        }
-
-        private void OnSelectInputField(string value)
-        {
-            if (GameManager.Instance.IsSpinning)
-                return;
         }
         
         private void OnValueChangedInputField(string value)
@@ -125,6 +125,11 @@ namespace _02.Scripts.Roulette
                 return;
             
             OnRemoveAction?.Invoke(this);
+        }
+
+        private void OnSpinning(bool value)
+        {
+            _inputField.interactable = !value;
         }
     }
 }
