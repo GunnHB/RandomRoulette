@@ -1,5 +1,6 @@
 using _02.Scripts.Result;
 using _02.Scripts.Roulette;
+using DarkTonic.MasterAudio;
 using DG.Tweening;
 using Sirenix.OdinInspector;
 using UnityEngine;
@@ -42,6 +43,10 @@ namespace _02.Scripts.Manager
                 })
                 .Append(_resultPanel.Popup.transform.DOScale(1f, .15f).SetEase(Ease.OutBounce))
                 .Join(_resultPanel.Popup.GetComponent<CanvasGroup>().DOFade(1f, .15f))
+                .JoinCallback(() =>
+                {
+                    MasterAudio.PlaySound("Ta-da");
+                })
                 .OnComplete(() =>
                 {
                     _bIsSpinning = false;
