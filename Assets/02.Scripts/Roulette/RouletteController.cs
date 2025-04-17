@@ -62,6 +62,9 @@ namespace _02.Scripts.Roulette
         [Title("Button")]
         [SerializeField] private UIButton _spinButton = null;
         [SerializeField] private Adding _addingPrefab = null;
+
+        [Title("Options")]
+        [SerializeField] private float _spinDuration = 0f;
         
         private Adding _adding = null;
         
@@ -319,7 +322,7 @@ namespace _02.Scripts.Roulette
             SetupTickAngles();
         
             _roulette.RouletteBase.transform
-                .DORotate(new Vector3(0f, 0f, -totalAngle), 5f, RotateMode.FastBeyond360).SetEase(Ease.OutQuart)
+                .DORotate(new Vector3(0f, 0f, -totalAngle), _spinDuration, RotateMode.FastBeyond360).SetEase(Ease.OutQuart)
                 .OnUpdate(() =>
                 {
                     if(GameManager.Instance.IsSpinning)
