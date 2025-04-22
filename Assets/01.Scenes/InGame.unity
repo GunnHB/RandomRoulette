@@ -1992,6 +1992,8 @@ MonoBehaviour:
   _rouletteItemPrefab: {fileID: 5502072119305720998, guid: 87e1bc121aac2e6489f2f503a68d76ab, type: 3}
   _spinButton: {fileID: 2011540343}
   _addingPrefab: {fileID: 1136843629957239058, guid: a2e0ff5a12c97794f80afb823413ddfd, type: 3}
+  _spinMin: 50
+  _spinMax: 80
   _spinDuration: 8
 --- !u!1 &1731593755
 GameObject:

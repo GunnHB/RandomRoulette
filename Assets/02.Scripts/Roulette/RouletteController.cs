@@ -63,7 +63,9 @@ namespace _02.Scripts.Roulette
         [SerializeField] private UIButton _spinButton = null;
         [SerializeField] private Adding _addingPrefab = null;
 
-        [Title("Options")]
+        [Title("Options")] 
+        [SerializeField] private float _spinMin = 0f;
+        [SerializeField] private float _spinMax = 0f;
         [SerializeField] private float _spinDuration = 0f;
         
         private Adding _adding = null;
@@ -270,8 +272,8 @@ namespace _02.Scripts.Roulette
 
         private void OnClickSpinButton()
         {
-            float randomRotations = UnityEngine.Random.Range(20f, 30f);     // 20 ~ 30바퀴
-            float randomAngle = UnityEngine.Random.Range(0f, 360f);         // 멈출 위치
+            float randomRotations = UnityEngine.Random.Range(_spinMin, _spinMax);     // 회전 횟수는 랜덤
+            float randomAngle = UnityEngine.Random.Range(0f, 360f);                   // 멈출 위치
             float totalAngle = 360f * randomRotations + randomAngle;
 
             SetRouletteAngleList();
