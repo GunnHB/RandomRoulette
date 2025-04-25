@@ -13,8 +13,7 @@ namespace _02.Scripts.Manager
 {
     public class GameManager : Singleton<GameManager>
     {
-        [Title("GameResult")]
-        [SerializeField] private ResultPanel _resultPanel = null;
+        private ResultPanel _resultPanel = null;
         
         private static bool _bIsSpinning = false;
 
@@ -24,6 +23,12 @@ namespace _02.Scripts.Manager
         {
             if (_resultPanel != null)
                 _resultPanel.OnRequestClosePanel += DeactivateResult;
+        }
+
+        public void SetupResultPanel(ResultPanel panel)
+        {
+            if (panel != null)
+                _resultPanel = panel;
         }
 
         public bool IsSpinning
